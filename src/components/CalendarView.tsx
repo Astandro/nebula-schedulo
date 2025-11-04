@@ -156,7 +156,10 @@ export const CalendarView = () => {
         border-radius: 0.5rem;
         padding: 0.25rem 0.5rem;
         transition: all 0.2s;
-        cursor: pointer;
+        cursor: grab;
+      }
+      .fc .fc-event:active {
+        cursor: grabbing;
       }
       .fc .fc-event:hover {
         box-shadow: 0 0 20px hsl(188 95% 50% / 0.6);
@@ -262,7 +265,10 @@ export const CalendarView = () => {
             eventClick={handleEventClick}
             eventDrop={handleEventDrop}
             eventResize={handleEventResize}
+            eventResizableFromStart={true}
             height="auto"
+            slotDuration="00:15:00"
+            snapDuration="00:15:00"
             validRange={{
               start: new Date(),
               end: '2030-12-31',
