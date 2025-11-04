@@ -8,10 +8,12 @@ import { useBookingStore } from '@/store/useBookingStore';
 import { BookingModal } from './BookingModal';
 import { Calendar as CalendarIcon, Grid, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 export const CalendarView = () => {
   const calendarRef = useRef<FullCalendar>(null);
   const { bookings, addBooking, updateBooking, deleteBooking } = useBookingStore();
+  const { toast } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<{
     start: Date;
@@ -26,8 +28,30 @@ export const CalendarView = () => {
     end: Date;
   } | null>(null);
 
+  // Check for overlapping bookings
+  const hasOverlap = (start: Date, end: Date, excludeId?: string) => {
+    return bookings.some((booking) => {
+      if (excludeId && booking.id === excludeId) return false;
+      const bookingStart = new Date(booking.start);
+      const bookingEnd = new Date(booking.end);
+      return (
+        (start >= bookingStart && start < bookingEnd) ||
+        (end > bookingStart && end <= bookingEnd) ||
+        (start <= bookingStart && end >= bookingEnd)
+      );
+    });
+  };
+
   // Handle date selection
   const handleDateSelect = (selectInfo: any) => {
+    if (hasOverlap(selectInfo.start, selectInfo.end)) {
+      toast({
+        title: "Waktu tidak tersedia",
+        description: "Sudah ada booking di waktu tersebut. Silakan pilih waktu lain.",
+        variant: "destructive",
+      });
+      return;
+    }
     setSelectedSlot({
       start: selectInfo.start,
       end: selectInfo.end,
@@ -37,6 +61,15 @@ export const CalendarView = () => {
 
   // Handle event drop (move)
   const handleEventDrop = (dropInfo: any) => {
+    if (hasOverlap(dropInfo.event.start, dropInfo.event.end, dropInfo.event.id)) {
+      dropInfo.revert();
+      toast({
+        title: "Waktu tidak tersedia",
+        description: "Tidak bisa memindahkan ke waktu yang sudah dibooking.",
+        variant: "destructive",
+      });
+      return;
+    }
     updateBooking(dropInfo.event.id, {
       start: dropInfo.event.start,
       end: dropInfo.event.end,
@@ -45,6 +78,15 @@ export const CalendarView = () => {
 
   // Handle event resize
   const handleEventResize = (resizeInfo: any) => {
+    if (hasOverlap(resizeInfo.event.start, resizeInfo.event.end, resizeInfo.event.id)) {
+      resizeInfo.revert();
+      toast({
+        title: "Waktu tidak tersedia",
+        description: "Tidak bisa mengubah durasi ke waktu yang sudah dibooking.",
+        variant: "destructive",
+      });
+      return;
+    }
     updateBooking(resizeInfo.event.id, {
       start: resizeInfo.event.start,
       end: resizeInfo.event.end,
@@ -67,6 +109,15 @@ export const CalendarView = () => {
     end: Date;
   }) => {
     if (editingBooking) {
+      // Check for overlap when updating
+      if (hasOverlap(data.start, data.end, editingBooking.id)) {
+        toast({
+          title: "Waktu tidak tersedia",
+          description: "Sudah ada booking di waktu tersebut. Silakan pilih waktu lain.",
+          variant: "destructive",
+        });
+        return;
+      }
       // Update existing booking
       updateBooking(editingBooking.id, {
         title: `${data.name}'s Meeting`,
@@ -75,6 +126,15 @@ export const CalendarView = () => {
         end: data.end,
       });
     } else {
+      // Check for overlap when creating new booking
+      if (hasOverlap(data.start, data.end)) {
+        toast({
+          title: "Waktu tidak tersedia",
+          description: "Sudah ada booking di waktu tersebut. Silakan pilih waktu lain.",
+          variant: "destructive",
+        });
+        return;
+      }
       // Create new booking
       const newBooking = {
         title: `${data.name}'s Meeting`,
