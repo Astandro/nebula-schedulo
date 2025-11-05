@@ -168,7 +168,7 @@ export const CalendarView = () => {
     start: b.start,
     end: b.end,
     backgroundColor: b.id === newBookingId ? "transparent" : "hsl(188 95% 90%)",
-    borderColor: "hsl(188 95% 50%)",
+    borderColor: "hsl(188 95% 90%)",
     textColor: "hsl(222.2 84% 4.9%)",
   }));
 
@@ -178,7 +178,7 @@ export const CalendarView = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="glass-card rounded-2xl p-6 lg:p-8"
+        className="glass-card rounded-2xl p-6 lg:p-8 shadow-xl"
       >
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">

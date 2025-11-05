@@ -41,7 +41,14 @@
   color: #888;
 }
 
-
 .fc-day-disabled {
   background: var(--fc-button-bg-color);
+}
+
+.fc-theme-standard .fc-scrollgrid, .fc-theme-standard td, .fc-theme-standard th {
+  border: 1px solid #ffffff;
+}
+
+.fc .fc-col-header-cell-cushion {
+  font-weight: 500;
 }
